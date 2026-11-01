@@ -13,8 +13,11 @@ public class GridRenderer extends JPanel {
     private final int cols;
     private final int cellSize;
     private final Color[][] cellColors;
+    private final String[][] cellTexts;
+    private final Color[][] cellTextColors;
     // Цвета по умолчанию
     private static final Color DEFAULT_CELL_COLOR = Color.WHITE;
+    private static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
     private static final Color GRID_LINE_COLOR = Color.GRAY;
     // Цвет, которым закрашивается клетка по клику мыши
     private Color clickColor = Color.ORANGE;
@@ -24,7 +27,9 @@ public class GridRenderer extends JPanel {
         this.cols = cols;
         this.cellSize = cellSize;
         this.cellColors = new Color[rows][cols];
-        
+        this.cellTexts = new String[rows][cols];
+        this.cellTextColors = new Color[rows][cols];
+
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cellColors[r][c] = DEFAULT_CELL_COLOR;
@@ -67,10 +72,27 @@ public class GridRenderer extends JPanel {
         cellColors[y][x] = color;
     }
     
+    /**
+     * Написать текст (цифру, букву, любую строку) поверх клетки (x — столбец, y — строка).
+     * Цвет текста по умолчанию — чёрный.
+     */
+    public void setCellText(int x, int y, String text) {
+        setCellText(x, y, text, DEFAULT_TEXT_COLOR);
+    }
+
+    public void setCellText(int x, int y, String text, Color color) {
+        if (!isInBounds(y, x)) {
+            throw new IllegalArgumentException("Координаты вне сетки: row=" + y + ", col=" + x);
+        }
+        cellTexts[y][x] = text;
+        cellTextColors[y][x] = color;
+    }
+
     public void clear() {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cellColors[r][c] = DEFAULT_CELL_COLOR;
+                cellTexts[r][c] = null;
             }
         }
     }
@@ -123,6 +145,23 @@ public class GridRenderer extends JPanel {
             }
         }
         
+        // Рисуем текст в клетках, по центру каждой
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setFont(getFont().deriveFont(Font.BOLD, cellSize * 0.5f));
+        FontMetrics fm = g2.getFontMetrics();
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                String text = cellTexts[r][c];
+                if (text == null) {
+                    continue;
+                }
+                int textX = c * cellSize + (cellSize - fm.stringWidth(text)) / 2;
+                int textY = r * cellSize + (cellSize - fm.getHeight()) / 2 + fm.getAscent();
+                g2.setColor(cellTextColors[r][c]);
+                g2.drawString(text, textX, textY);
+            }
+        }
+
         // Рисуем линии сетки
         g2.setColor(GRID_LINE_COLOR);
         for (int r = 0; r <= rows; r++) {
