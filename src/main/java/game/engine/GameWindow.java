@@ -54,9 +54,12 @@ public class GameWindow extends JFrame {
     private void update() {
         // пока пусто — заглушка под будущую логику
         
+        // считаем, сколько времени прошло с прошлого тика (для Time.deltaTime())
+        Time.tick();
+
         scene.update();
         scene.render();
-        
+
         // сбрасываем флаги "нажато/отпущено в этом кадре"
         Keyboard.endFrame();
     }
