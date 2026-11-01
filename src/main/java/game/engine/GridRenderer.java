@@ -1,16 +1,14 @@
-package game;
+package game.engine;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * Панель с сеткой квадратов.
  * Отвечает только за отрисовку и хранение цвета каждой клетки.
  * Логика игры (движение, ввод с клавиатуры и т.п.) находится в других классах.
  */
-public class GamePanel extends JPanel {
+public class GridRenderer extends JPanel {
     private final int rows;
     private final int cols;
     private final int cellSize;
@@ -21,7 +19,7 @@ public class GamePanel extends JPanel {
     // Цвет, которым закрашивается клетка по клику мыши
     private Color clickColor = Color.ORANGE;
     
-    public GamePanel(int rows, int cols, int cellSize) {
+    public GridRenderer(int rows, int cols, int cellSize) {
         this.rows = rows;
         this.cols = cols;
         this.cellSize = cellSize;
@@ -62,11 +60,30 @@ public class GamePanel extends JPanel {
         this.clickColor = color;
     }
     
+    public void setCellColor(int x, int y, Color color) {
+        if (!isInBounds(y, x)) {
+            throw new IllegalArgumentException("Координаты вне сетки: row=" + y + ", col=" + x);
+        }
+        cellColors[y][x] = color;
+    }
+    
+    public void clear() {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                cellColors[r][c] = DEFAULT_CELL_COLOR;
+            }
+        }
+    }
+    
+    public void render() {
+        repaint();
+    }
+    
     /**
      * Закрасить квадрат по координатам (row, col) в заданный цвет.
      * Координаты: row — строка (0..rows-1), col — столбец (0..cols-1).
      */
-    public void setSquareColor(int row, int col, Color color) {
+    public void drawCellInstantly(int row, int col, Color color) {
         if (!isInBounds(row, col)) {
             throw new IllegalArgumentException("Координаты вне сетки: row=" + row + ", col=" + col);
         }
@@ -78,7 +95,7 @@ public class GamePanel extends JPanel {
      * Сбросить квадрат к цвету по умолчанию.
      */
     public void clearSquare(int row, int col) {
-        setSquareColor(row, col, DEFAULT_CELL_COLOR);
+        drawCellInstantly(row, col, DEFAULT_CELL_COLOR);
     }
     
     public boolean isInBounds(int row, int col) {

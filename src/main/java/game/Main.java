@@ -1,5 +1,6 @@
 package game;
 
+import game.engine.GameWindow;
 import javax.swing.*;
 
 public class Main {
